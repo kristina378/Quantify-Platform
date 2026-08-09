@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Quantify.Core.Models;
 using Quantify.ViewModels;
 using Pomelo.EntityFrameworkCore.MySql.Query.Internal;
+using Markdig;
 
 
 namespace Quantify.Controllers;
@@ -94,6 +95,9 @@ public class LearningMaterialsController : Controller
         if(module == null || topic == null)
             return NotFound();
         
+
+        var pipeline = new MarkdownPipelineBuilder().UseMathematics().Build();
+
         var tasks = await _context.MathTasks.Where(task => task.TopicId == topic.TopicId).ToListAsync();
         List<ShowTaskContentViewModel>? tasksView = null;
         if(tasks.Count != 0)
@@ -112,14 +116,15 @@ public class LearningMaterialsController : Controller
                 tasksView.Add(newTaskView);
             }
         }
-
+        
+        string htmlContent = Markdown.ToHtml(topic.Content, pipeline);
 
         var topicView = new ShowTopicContentViewModel()
         {
             TopicId = topic.TopicId,
             ModuleId = moduleId,
             Name = topic.Name,
-            Content = topic.Content,
+            Content = htmlContent,
             Tasks = tasksView
         };
 
@@ -149,19 +154,17 @@ public class LearningMaterialsController : Controller
                 }
             }
         }
-        
-        var taskView = new ShowTaskContentViewModel()
+        var pipeline = new MarkdownPipelineBuilder().UseMathematics().Build();
+        string htmlContent = Markdown.ToHtml(task.Contents, pipeline);
+
+        var taskDisplayView = new SolveTaskDisplayViewModel()
         {
             TaskId = task.TaskId,
-            Contents = task.Contents,
-            PointsCount = task.PointsCount,
-            DifficultyLevel = (int)task.Level,
-            ExpReward = task.ExpReward,
+            Contents = htmlContent,
             Answers = answers
         };
-
         
-        return View(taskView);
+        return View(taskDisplayView);
     }
 
 }

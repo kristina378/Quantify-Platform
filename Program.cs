@@ -1,10 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Quantify.Core.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore.Internal;
+using System.Runtime.InteropServices.Marshalling;
+using Microsoft.Extensions.DependencyInjection;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +21,19 @@ public class Program
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
         var app = builder.Build();
+
+        using (var scope = app.Services.CreateScope())
+        {
+            try{
+                var context = scope.ServiceProvider.GetRequiredService<QuantifyDbContext>();
+                var dbData = new DataBaseInitializer();
+                await dbData.InsertLearningMaterials(context);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        } 
 
         // Configure the HTTP request pipeline.
         if (!app.Environment.IsDevelopment())

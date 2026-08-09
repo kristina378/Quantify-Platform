@@ -6,12 +6,16 @@
 }
 
 <div class="text-start mt-4"><h1>@Model.Name:</h1></div>
-<div class="text-start mt-3"><p>@Model.Content</p></div>
+<div class="text-start mt-3">@Html.Raw(Model.Content)</div>
 <div class="text-center mt-3"><h2>Dostępne zadania:</h2></div>
 <div class="text-start mt-3">
     @if(Model.Tasks != null){
+        long nr = 1;
         foreach(ShowTaskContentViewModel task in Model.Tasks){
-            <a asp-controller="LearningMaterials" asp-action="ShowTaskContent" asp-route-taskId="@task.TaskId">@task.Contents</a>
+            <div class="text-start">
+                <a asp-controller="LearningMaterials" asp-action="ShowTaskContent" asp-route-taskId="@task.TaskId">Zadanie @nr</a>
+            </div>
+            nr++;
         }
     }
 </div>

@@ -5,7 +5,20 @@
     ViewData["Title"] = "Show Task Content";
 }
 
-<div class="text-start mt-4"><p>@Model.Contents</p></div>
+<div class="text-start mt-4">@Html.Raw(Model.Contents)</div>
+
+@if(TempData["SuccessMessage"] != null){
+     <div class="alert alert-success mt-3" role="alert">
+        @TempData["SuccessMessage"]
+    </div>
+}
+else if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger mt-3" role="alert">
+        @ViewBag.ErrorMessage
+    </div>
+}
+
 <div class="text-start mt-3">
     @if(Model.Answers != null && Model.Answers.Count != 0){
         @for(int i = 0; i < Model.Answers.Count; i++){
