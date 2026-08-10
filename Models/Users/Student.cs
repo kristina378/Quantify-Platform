@@ -31,13 +31,15 @@ public class Student: User
     }
 
 
-    public void AddAnotherTaskProgress(MathTask task, List<Answer> studentAnswers)
+    public StudentTaskProgress AddAnotherTaskProgress(MathTask task, List<Answer> studentAnswers)
     {
         bool alreadyExists = false;
+        StudentTaskProgress studentProgress = null!;
         foreach (StudentTaskProgress progress in Approaches)
         {
             if(progress.TaskId == task.TaskId)
             {
+                studentProgress = progress;
                 alreadyExists = true;
                 break;
             }
@@ -45,17 +47,18 @@ public class Student: User
 
         if (alreadyExists)
         {
-            return;
+            studentProgress.AddAnotherApproach(studentAnswers);
+            return studentProgress;
         }
 
-        StudentTaskProgress newTaskProgress = new StudentTaskProgress(this.Id, task, studentAnswers);
-        Approaches.Add(newTaskProgress);
+        studentProgress = new StudentTaskProgress(this.Id, task, studentAnswers);
+        Approaches.Add(studentProgress);
 
-        if (newTaskProgress.Passed)
-        {
-            //AddCoins();
-        }
-        return;
+        // if (studentProgress.Passed)
+        // {
+        //     //AddCoins();
+        // }
+        return studentProgress;
     }
 
     public void AddCoins(int CointsCount)

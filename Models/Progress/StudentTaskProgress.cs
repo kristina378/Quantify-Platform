@@ -19,7 +19,7 @@ public class StudentTaskProgress
     protected StudentTaskProgress(){}
     public StudentTaskProgress(long userId, MathTask task, List<Answer> studentAnswers)
     {
-        ApproachNumber = 0;
+        ApproachNumber = 1;
 
         UserId = userId;
         TaskId = task.TaskId;
@@ -33,14 +33,17 @@ public class StudentTaskProgress
     }
 
     
-    public void AddAnotherApproach(List<Answer> studentAnswers)
+    public Approach AddAnotherApproach(List<Answer> studentAnswers)
     {
         if((++ApproachNumber) < LimitCount)
         {
             Approach nextAttempt = new Approach(this.Task,studentAnswers,this);
             Attempts.Add(nextAttempt);
 
+            Passed = nextAttempt.Passed;
             Average = (Average * (ApproachNumber - 1) + (nextAttempt.Passed? Task.PointsCount: 0))/ApproachNumber;
+
+            return nextAttempt;
         }
         else
         {
