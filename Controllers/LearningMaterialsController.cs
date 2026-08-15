@@ -98,24 +98,8 @@ public class LearningMaterialsController : Controller
 
         var pipeline = new MarkdownPipelineBuilder().UseMathematics().Build();
 
-        var tasks = await _context.MathTasks.Where(task => task.TopicId == topic.TopicId).ToListAsync();
-        List<ShowTaskContentViewModel>? tasksView = null;
-        if(tasks.Count != 0)
-        {
-            tasksView = new List<ShowTaskContentViewModel>();
-            foreach(var task in tasks)
-            {
-                var newTaskView = new ShowTaskContentViewModel()
-                {
-                    TaskId = task.TaskId,
-                    Contents = task.Contents,
-                    PointsCount = task.PointsCount,
-                    DifficultyLevel = (int)task.Level
-                };
-
-                tasksView.Add(newTaskView);
-            }
-        }
+        var hasAnyTasks = await _context.MathTasks.Where(task => task.TopicId == topic.TopicId).AnyAsync();
+       
         
         string htmlContent = Markdown.ToHtml(topic.Content, pipeline);
 
@@ -125,7 +109,7 @@ public class LearningMaterialsController : Controller
             ModuleId = moduleId,
             Name = topic.Name,
             Content = htmlContent,
-            Tasks = tasksView
+            HasTasks = hasAnyTasks
         };
 
         
@@ -167,4 +151,54 @@ public class LearningMaterialsController : Controller
         return View(taskDisplayView);
     }
 
+    public async Task<IActionResult> ShowTask(long moduleId, long topicId, bool? wasPreviousAnswerCorrect = null, int currentIndex = 0)
+    {
+        // task from database sorted by id
+        var allTopicTasks = _context.MathTasks.Include(task => task.AllAnswers).Where(task => task.TopicId == topicId).OrderBy(task => task.TaskId);
+        long tasksCount;
+        if(allTopicTasks == null || (tasksCount = await allTopicTasks.CountAsync()) == 0)
+        {
+            return NotFound();
+        }
+
+        
+        var task = await allTopicTasks.Skip(currentIndex).FirstOrDefaultAsync();
+        if(task == null || task.AllAnswers == null || task.AllAnswers.Count == 0)
+        {
+            return NotFound();
+        }
+
+        List<AnswerDisplayViewModel> answersViewModels = new List<AnswerDisplayViewModel>();
+        foreach(var answer in task.AllAnswers)
+        {
+            AnswerDisplayViewModel newAnswer = new AnswerDisplayViewModel()
+            {
+                AnswerId = answer.AnswerId,
+                Content = answer.Content
+            };
+            answersViewModels.Add(newAnswer);
+        }
+
+        var pipeline = new MarkdownPipelineBuilder().UseMathematics().Build();
+        var htmlContent = Markdown.ToHtml(task.Contents, pipeline);
+
+        var currentTaskDisplay = new ShowTaskContentViewModel()
+        {
+            TaskId = task.TaskId,
+            ModuleId = moduleId,
+            TopicId = topicId,
+            CurrentTaskIndex = currentIndex,
+            Contents = htmlContent,
+            TotalTasksCount = tasksCount,
+            Answers = answersViewModels,
+            RemainingAttempts = 3
+        };
+
+        if(wasPreviousAnswerCorrect != null)
+        {
+            currentTaskDisplay.HasCorrectAnswer = wasPreviousAnswerCorrect;
+        }
+
+        return View("ShowTaskContent", currentTaskDisplay);
+    }
 }

@@ -4,7 +4,7 @@ public class AddingChancesException: Exception{}
 public class StudentTaskProgress
 {
     public long StudentTaskProgressId {get; init;}
-    public static int LimitCount = 5;
+    public static int LimitCount = 100;
 
     public long UserId {get; private set;}
     public long TaskId{get; init;}

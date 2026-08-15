@@ -1,5 +1,5 @@
 @using Quantify.ViewModels
-@model SolveTaskDisplayViewModel
+@model ShowTaskContentViewModel
 
 @{
     ViewData["Title"] = "Show Task Content";
@@ -12,10 +12,11 @@
         @TempData["SuccessMessage"]
     </div>
 }
-else if (ViewBag.ErrorMessage != null)
+
+@if(TempData["ErrorMessage"] != null)
 {
     <div class="alert alert-danger mt-3" role="alert">
-        @ViewBag.ErrorMessage
+        @TempData["ErrorMessage"]
     </div>
 }
 
@@ -33,7 +34,23 @@ else if (ViewBag.ErrorMessage != null)
         }
         <div class="text-end mt-3">
             <input type="hidden" name="TaskId" value="@Model.TaskId"/>
+            <input type="hidden" name="TopicId" value="@Model.TopicId"/>
+            <input type="hidden" name="ModuleId" value="@Model.ModuleId"/>
+            <input type="hidden" name="CurrentTaskIndex" value="@Model.CurrentTaskIndex"/>
+            <input type="hidden" name="TotalTasksCount" value="@Model.TotalTasksCount"/>
             <button class="btn btn-primary" type="submit">Check</button>
         </div>
     </form>
+    @if(Model.CurrentTaskIndex + 1 == Model.TotalTasksCount){
+            <div class="text-end mt-2">
+                <a class="btn btn-outline-danger" asp-controller="Progress" asp-action="SummaryTopic" asp-route-moduleId="@Model.ModuleId" asp-route-topicId="@Model.TopicId">Zakończ podejście</a>
+            </div>
+    }
+    @if(Model.CurrentTaskIndex > 0){
+        <div class="text-start mt-3">
+            <a class="btn btn-primary" asp-controller="LearningMaterials" asp-action="ShowTask" asp-route-moduleId="@Model.ModuleId" asp-route-topicId="@Model.TopicId" asp-route-currentIndex="@(Model.CurrentTaskIndex-1)">
+                Poprzednie zadanie
+            </a>
+        </div>
+    }
 </div>

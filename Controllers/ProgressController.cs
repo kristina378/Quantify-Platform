@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Quantify.Core.Users;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Quantify.Controllers;
 
@@ -42,9 +43,12 @@ public class ProgressController: Controller
             answersViews.Add(answerView);
         }
 
-        SolveTaskDisplayViewModel displayTask = new SolveTaskDisplayViewModel()
+        ShowTaskContentViewModel displayTask = new ShowTaskContentViewModel()
         {   
             TaskId = userTaskAnswer.TaskId,
+            TopicId = userTaskAnswer.TopicId,
+            TotalTasksCount = userTaskAnswer.TotalTasksCount,
+            CurrentTaskIndex = userTaskAnswer.CurrentTaskIndex,
             Contents = task.Contents,
             Answers = answersViews
         };
@@ -54,7 +58,8 @@ public class ProgressController: Controller
         // mark at least one answer
         if(userTaskAnswer.UserAnswers == null || userTaskAnswer.UserAnswers.Count == 0)
         {
-            return View("~/Views/LearningMaterials/ShowTaskContent.cshtml", displayTask);
+            TempData["ErrorMessage"] = "You must select at least one answer!";
+            return RedirectToAction("ShowTask","LearningMaterials", new {moduleId = userTaskAnswer.ModuleId, topicId = userTaskAnswer.TopicId, currentIndex = userTaskAnswer.CurrentTaskIndex});
         }
         
 
@@ -83,17 +88,65 @@ public class ProgressController: Controller
 
         await _context.SaveChangesAsync();
 
-
+        displayTask.HasCorrectAnswer = lastApproach.Passed;
+        displayTask.RemainingAttempts = StudentTaskProgress.LimitCount - studentProgress.ApproachNumber;
 
         if (!lastApproach.Passed)
         {
             //here we need to inform user that task wasn't solve right
-            ViewBag.ErrorMessage = "Wrong answer, try again!";
-            return View("~/Views/LearningMaterials/ShowTaskContent.cshtml", displayTask);
+            TempData["ErrorMessage"] = "Wrong answer, try again!";
         }
         //here the case when task solved right : all correct answers were given
+        else
+        {
+            TempData["SuccessMessage"] = "You got it, great job!";
+        }
 
-        TempData["SuccessMessage"] = "You got it, great job!";
-        return RedirectToAction("ShowTaskContent","LearningMaterials", new {taskId = userTaskAnswer.TaskId});
+        //it was the last task in current topic test
+        if(userTaskAnswer.CurrentTaskIndex + 1 >= userTaskAnswer.TotalTasksCount)
+        {
+            return RedirectToAction("ShowTask","LearningMaterials", new {moduleId = userTaskAnswer.ModuleId, topicId = userTaskAnswer.TopicId, wasPreviousAnswerCorrect = lastApproach.Passed, currentIndex = userTaskAnswer.CurrentTaskIndex});
+        }
+
+        return RedirectToAction("ShowTask","LearningMaterials", new {moduleId = userTaskAnswer.ModuleId, topicId = userTaskAnswer.TopicId, currentIndex = userTaskAnswer.CurrentTaskIndex + 1, taskId = userTaskAnswer.TaskId});
+    }
+
+
+    public async Task<IActionResult> SummaryTopic(long moduleId, long topicId)
+    {
+        var userId = long.Parse((User.FindFirst(ClaimTypes.NameIdentifier)).Value);
+        var user = await _context.Students.Include(student => student.Approaches).FirstOrDefaultAsync(student => student.Id == userId);
+
+        if(user == null || user.Approaches == null || user.Approaches.Count == 0)
+        {
+            return NotFound();
+        }
+
+        var allTopicTasksId = (await _context.MathTasks.Where(task => task.TopicId == topicId).OrderBy(task => task.TaskId).ToListAsync()).Select(t => t.TaskId).ToList();
+        if(allTopicTasksId == null)
+        {
+            return NotFound();
+        }
+
+
+        SummaryTopicViewModel summaryTest = new SummaryTopicViewModel()
+        {
+            ModuleId = moduleId,
+            TopicId = topicId,
+            TotalTaskCount = allTopicTasksId.Count
+        };
+
+        foreach(var taskId in allTopicTasksId)
+        {
+            var approach = user.Approaches.LastOrDefault(approach => approach.TaskId == taskId);
+            if(approach == null)
+            {
+                continue;
+            }
+
+            if(approach.Passed)
+                summaryTest.TotalRightSolvedTaskCount += 1;
+        }
+        return View(summaryTest);
     }
 }

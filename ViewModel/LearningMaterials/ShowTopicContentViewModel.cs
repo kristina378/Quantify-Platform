@@ -12,5 +12,5 @@ public class ShowTopicContentViewModel
     [Required]
     public required string Content {get; set;}
 
-    public List<ShowTaskContentViewModel>? Tasks {get; set;} = null;
+    public bool HasTasks { get; set;}
 }
