@@ -32,7 +32,6 @@ public class StudentTaskProgress
         Passed = newAttempt.Passed;
     }
 
-    
     public Approach AddAnotherApproach(List<Answer> studentAnswers)
     {
         if((++ApproachNumber) < LimitCount)
@@ -43,6 +42,14 @@ public class StudentTaskProgress
             Passed = nextAttempt.Passed;
             Average = (Average * (ApproachNumber - 1) + (nextAttempt.Passed? Task.PointsCount: 0))/ApproachNumber;
 
+            // we store in db 3 last attempts and 1 the best for every task progress
+            // to prevent too fast filling of db with approaches logs
+            var lastAttempts = Attempts.OrderByDescending(attempt => attempt.TimeStarted).Take(3).ToList();
+            var bestLastAttempt = Attempts.LastOrDefault(attempt => attempt.Passed);
+
+            Attempts.RemoveAll(attempt => attempt != bestLastAttempt && !lastAttempts.Contains(attempt));
+
+
             return nextAttempt;
         }
         else
@@ -51,6 +58,15 @@ public class StudentTaskProgress
         }
     }
 
+    public Approach? BestApproach()
+    {
+        if(Attempts.Count > 0)
+        {
+            return Attempts.LastOrDefault(attempt => attempt.Passed);
+        }
+        
+        return null;
+    }
     // public void AddAnotherChance(int chancesCount)
     // {   
     //     // extra protection for user to not buy infinity amount of Approaches count

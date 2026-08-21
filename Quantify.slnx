@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Quantify.csproj" />
+  <Project Path="Quantify.Tests/Quantify.Tests.csproj" />
+</Solution>
