@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Quantify.Core.Users;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Quantify.Controllers;
 
@@ -19,6 +20,7 @@ public class ProgressController: Controller
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> CheckAnswer(SolveTaskViewModel userTaskAnswer)
     {
         //extracting data about task from db
@@ -63,7 +65,9 @@ public class ProgressController: Controller
         }
         
 
-        var userId = long.Parse((User.FindFirst(ClaimTypes.NameIdentifier)).Value);
+        var claimValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var userId = long.Parse(claimValue!);
         var student = await _context.Students.Include(student => student.Approaches).ThenInclude(approach => approach.Attempts).FirstOrDefaultAsync(student => student.Id == userId);
 
         if(student == null)
@@ -75,7 +79,7 @@ public class ProgressController: Controller
 
         foreach(var answerId in userTaskAnswer.UserAnswers)
         {
-            Answer currAnswer = taskAnswers.FirstOrDefault(a => a.AnswerId == answerId);
+            Answer? currAnswer = taskAnswers.FirstOrDefault(a => a.AnswerId == answerId);
             if(currAnswer != null)
             {
                 userAnswersDB.Add(currAnswer);
@@ -111,10 +115,12 @@ public class ProgressController: Controller
         return RedirectToAction("ShowTask","LearningMaterials", new {moduleId = userTaskAnswer.ModuleId, topicId = userTaskAnswer.TopicId, currentIndex = userTaskAnswer.CurrentTaskIndex + 1, taskId = userTaskAnswer.TaskId});
     }
 
-
+    [Authorize]
     public async Task<IActionResult> SummaryTopic(long moduleId, long topicId)
     {
-        var userId = long.Parse((User.FindFirst(ClaimTypes.NameIdentifier)).Value);
+        var claimValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var userId = long.Parse(claimValue!);
         var user = await _context.Students.Include(student => student.Approaches).FirstOrDefaultAsync(student => student.Id == userId);
 
         if(user == null || user.Approaches == null || user.Approaches.Count == 0)
