@@ -23,7 +23,7 @@ public class Approach
     {
         TimeStarted = DateTime.UtcNow;
 
-        List<Answer>? rightAnswers = task.AllAnswers.FindAll(answer => answer.IsCorrect);
+        List<Answer>? rightAnswers = task.AllAnswers?.FindAll(answer => answer.IsCorrect) ?? new List<Answer>();
 
 
         bool fine = rightAnswers.All(answer => studentAnswers.Any(studAnswer => studAnswer.Content == answer.Content));

@@ -1,0 +1,17 @@
+@using Quantify.ViewModels
+@model SummaryTopicViewModel
+
+@{
+    ViewData["Title"] = "Summary Topic Test";
+}
+
+<div class="text-center mt-3">
+    @if(Model.ScorePercentage > 50){
+        <h2>Congrats, you smashed it and successfully passed the test!</h2>
+        <h4>Your final score is: @Model.ScorePercentage!</h4>
+    }
+    else{
+        <h2>Unfortunately you didn't do it now, but you can try again</h2>
+    }
+    <a class="btn btn-primary text-end mt-4" asp-controller="LearningMaterials" asp-action="ShowTopicContent" asp-route-moduleId="@Model.ModuleId" asp-route-topicId="@Model.TopicId">Return to current topic</a>
+</div>

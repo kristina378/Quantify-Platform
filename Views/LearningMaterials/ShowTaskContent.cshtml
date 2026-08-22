@@ -5,17 +5,52 @@
     ViewData["Title"] = "Show Task Content";
 }
 
-<div class="text-start mt-4"><p>@Model.Contents</p></div>
+<div class="text-start mt-4">@Html.Raw(Model.Contents)</div>
+
+@if(TempData["SuccessMessage"] != null){
+     <div class="alert alert-success mt-3" role="alert">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if(TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger mt-3" role="alert">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
 <div class="text-start mt-3">
-    @if(Model.Answers != null && Model.Answers.Count != 0){
-        @for(int i = 0; i < Model.Answers.Count; i++){
-            <div class="form-check mb-3">
-                <input type="checkbox" asp-for="Answers[i].IsCorrect" class="form-check-input">
-                <label asp-for="Answers[i].IsCorrect" class="form-check-label">
-                    @Model.Answers[i].Content
-                </label>
-                <span asp-validation-for="Answers[i].Content" class="text-danger"></span>
-            </div>
+    <form method="post" asp-controller="Progress" asp-action="CheckAnswer">
+        @if(Model.Answers != null && Model.Answers.Count != 0){
+            @for(int i = 0; i < Model.Answers.Count; i++){
+                <div class="form-check mb-3">
+                    <input type="checkbox" name="UserAnswers" value="@Model.Answers[i].AnswerId" class="form-check-input">
+                    <label class="form-check-label">
+                        @Model.Answers[i].Content
+                    </label>
+                </div>
+            }
         }
+        <div class="text-end mt-3">
+            <input type="hidden" name="TaskId" value="@Model.TaskId"/>
+            <input type="hidden" name="TopicId" value="@Model.TopicId"/>
+            <input type="hidden" name="ModuleId" value="@Model.ModuleId"/>
+            <input type="hidden" name="CurrentTaskIndex" value="@Model.CurrentTaskIndex"/>
+            <input type="hidden" name="TotalTasksCount" value="@Model.TotalTasksCount"/>
+            <button class="btn btn-primary" type="submit">Check</button>
+        </div>
+    </form>
+    @if(Model.CurrentTaskIndex + 1 == Model.TotalTasksCount){
+            <div class="text-end mt-2">
+                <a class="btn btn-outline-danger" asp-controller="Progress" asp-action="SummaryTopic" asp-route-moduleId="@Model.ModuleId" asp-route-topicId="@Model.TopicId">Zakończ podejście</a>
+            </div>
+    }
+    @if(Model.CurrentTaskIndex > 0){
+        <div class="text-start mt-3">
+            <a class="btn btn-primary" asp-controller="LearningMaterials" asp-action="ShowTask" asp-route-moduleId="@Model.ModuleId" asp-route-topicId="@Model.TopicId" asp-route-currentIndex="@(Model.CurrentTaskIndex-1)">
+                Poprzednie zadanie
+            </a>
+        </div>
     }
 </div>

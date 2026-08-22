@@ -20,7 +20,7 @@ public class Module
         Description = moduleDescription;
     }
 
-    public void AddNewTopic(string topicName, string topicContent)
+    public Topic AddNewTopic(string topicName, string topicContent)
     {
         Topic newTopic = new Topic(topicName, topicContent)
         {
@@ -29,6 +29,7 @@ public class Module
         };
         
         Topics.Add(newTopic);
+        return newTopic;
     }
     public void AddNewTopic(Topic newTopic)
     {

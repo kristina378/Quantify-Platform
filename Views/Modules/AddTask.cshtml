@@ -24,12 +24,14 @@
         <input asp-for="ExpReward" class="form-control"/>
         <span asp-validation-for="ExpReward" class="text-danger"></span>
     </div>
+    <div class="mb-3">
+        <label class="text-center"><h5>Answers:</h5></label>
+    </div>
     @if(Model.AllAnswers != null && Model.AllAnswers.Count != 0){
         @for(int i = 0; i < Model.AllAnswers.Count; i++){
-            <div class="mb-3">
-                <label asp-for="AllAnswers[i].Content"></label>
-                <input asp-for="AllAnswers[i].Content" class="form-control"/>
+            <div class="mb-3 d-flex align-items-center gap-2">
                 <input type="checkbox" asp-for="AllAnswers[i].IsCorrect"/>
+                <input asp-for="AllAnswers[i].Content" class="form-control"/>
                 <span asp-validation-for="AllAnswers[i].Content" class="text-danger"></span>
             </div>
         }

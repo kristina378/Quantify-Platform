@@ -1,0 +1,204 @@
+[
+  {
+    "ModuleName": "Zbiory liczbowe",
+    "Description": "Dział poświęcony zbiorom liczbowym oraz działaniach na nich",
+    "Topics": [
+      {
+        "TopicName": "Pojęcie zbioru",
+        "PathToContent": "Data/SeedData/Topics/PojecieZbioru.md",
+        "Tasks":[
+            {
+                "Content": "Zbiorem liczbowym jest na przykład:",
+                "Answers": [
+                    {
+                        "Content": "{1,2,3,2,5,3,7}",
+                        "IsCorrect": true
+                    },
+                    {
+                        "Content" : "{a,b,c,d,e}",
+                        "IsCorrect": false
+                    },
+                    {
+                        "Content": "{1,e,a,3,2,d,4}",
+                        "IsCorrect": false
+                    }
+                ]
+            },
+            {
+                "Content" : "Jak poprawnie matematycznie zapisać zbiór składający się z takich elementów: 5,4,4,2,1,2,1?",
+                "Answers": [
+                    {
+                        "Content": "{5,4,4,2,1,2,1}",
+                        "IsCorrect": false
+                    },
+                    {
+                        "Content": "{5,4,2,1}",
+                        "IsCorrect" : true
+                    },
+                    {
+                        "Content": "{1,2,4,5}",
+                        "IsCorrect": true
+                    }
+                ]
+            },
+            {
+                "Content": "Zbiór A = {1, 2, 3}. Które z poniższych zdań jest zawsze prawdziwe?",
+                "Answers": [
+                    {
+                        "Content": "∅ ⊂ A",
+                        "IsCorrect": true
+                    },
+                    {
+                        "Content": "A ⊂ ∅",
+                        "IsCorrect": false
+                    },
+                    {
+                        "Content": "A ⊂ A",
+                        "IsCorrect": true
+                    }
+                ]
+            },
+            {
+                "Content": "Co oznacza zapis A ⊊ B?",
+                "Answers": [
+                    {
+                        "Content": "Zbiór A jest podzbiorem zbioru B i zbiory te nie są równe",
+                        "IsCorrect": true
+                    },
+                    {
+                        "Content": "Zbiór B jest podzbiorem zbioru A",
+                        "IsCorrect" : false
+                    },
+                    {
+                        "Content": "Zbior A może być równy zbiorowi B",
+                        "IsCorrect": false
+                    },
+                    {
+                        "Content": "Zbior A nie może być równy zbiorowi B",
+                        "IsCorrect": true
+                    }
+                ]
+            }
+        ]
+      },
+      {
+        "TopicName": "Działania na zbiorach",
+        "PathToContent": "Data/SeedData/Topics/DzialaniaNaZbiorach.md",
+        "Tasks": [
+          {
+            "PathToContent": "Data/SeedData/Tasks/DzialaniaNaZbiorach/Suma.md",
+            "Answers": [
+              {
+                "Content": "{1,2,3,2,5,3,7}",
+                "IsCorrect": false
+              },
+              {
+                "Content": "{1,2,3,5,7}",
+                "IsCorrect": true
+              },
+              {
+                "Content": "{2,3}",
+                "IsCorrect": false
+              }
+            ]
+          },
+          {
+            "PathToContent": "Data/SeedData/Tasks/DzialaniaNaZbiorach/Roznica.md",
+            "Answers": [
+              {
+                "Content": "{1,2,3,2,5,3,7}",
+                "IsCorrect": false
+              },
+              {
+                "Content": "{1,2,3,5,7}",
+                "IsCorrect": false
+              },
+              {
+                "Content": "{1}",
+                "IsCorrect": true
+              }
+            ]
+          },
+          {
+            "PathToContent": "Data/SeedData/Tasks/DzialaniaNaZbiorach/CzescWspolna.md",
+            "Answers": [
+              {
+                "Content": "{1,2,3,2,5,3,7}",
+                "IsCorrect": false
+              },
+              {
+                "Content": "{2,3}",
+                "IsCorrect": true
+              },
+              {
+                "Content": "{1}",
+                "IsCorrect": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "TopicName": "Zbiory liczbowe",
+        "PathToContent": "Data/SeedData/Topics/ZbioryLiczbowe.md",
+        "Tasks": [
+            {
+            "Content": "W którym ze zbiorów zawsze wykonalne jest odejmowanie (czyli różnica dwóch dowolnych liczb z tego zbioru zawsze również do niego należy)?",
+            "Answers": [
+              {
+                "Content": "Tylko w zbiorze liczb naturalnych (N)",
+                "IsCorrect": false
+              },
+              {
+                "Content": "Tylko w zbiorze liczb całkowitych (Z)",
+                "IsCorrect": true
+              },
+              {
+                "Content": "Zarówno w zbiorze liczb naturalnych (N), jak i całkowitych (Z)",
+                "IsCorrect": false
+              }
+            ]
+          },
+          {
+          "Content": "Zaznacz wszystkie prawdziwe informacje dotyczące rozwinięcia dziesiętnego liczby wymiernej (Q):",
+          "Answers": [
+            {
+              "Content": "Rozwinięcie dziesiętne może być skończone.",
+              "IsCorrect": true
+            },
+            {
+              "Content": "Rozwinięcie dziesiętne może być nieskończone okresowe.",
+              "IsCorrect": true
+            },
+            {
+              "Content": "Rozwinięcie dziesiętne zawsze jest nieskończone i nieokresowe.",
+              "IsCorrect": false
+            }
+            ]
+          },
+          {
+          "Content": "Zaznacz wszystkie liczby, które należą do zbioru liczb całkowitych (Z), ale NIE należą do zbioru liczb naturalnych dodatnich (N+):",
+          "Answers": [
+            {
+              "Content": "-7",
+              "IsCorrect": true
+            },
+            {
+              "Content": "0",
+              "IsCorrect": true
+            },
+            {
+              "Content": "5",
+              "IsCorrect": false
+            },
+            {
+              "Content": "1/2",
+              "IsCorrect": false
+            }
+          ]
+        }
+        ]
+      }
+    ]
+  }
+]

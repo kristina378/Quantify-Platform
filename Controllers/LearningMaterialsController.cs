@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Quantify.Core.Models;
 using Quantify.ViewModels;
 using Pomelo.EntityFrameworkCore.MySql.Query.Internal;
+using Markdig;
 
 
 namespace Quantify.Controllers;
@@ -94,33 +95,21 @@ public class LearningMaterialsController : Controller
         if(module == null || topic == null)
             return NotFound();
         
-        var tasks = await _context.MathTasks.Where(task => task.TopicId == topic.TopicId).ToListAsync();
-        List<ShowTaskContentViewModel>? tasksView = null;
-        if(tasks.Count != 0)
-        {
-            tasksView = new List<ShowTaskContentViewModel>();
-            foreach(var task in tasks)
-            {
-                var newTaskView = new ShowTaskContentViewModel()
-                {
-                    TaskId = task.TaskId,
-                    Contents = task.Contents,
-                    PointsCount = task.PointsCount,
-                    DifficultyLevel = (int)task.Level
-                };
 
-                tasksView.Add(newTaskView);
-            }
-        }
+        var pipeline = new MarkdownPipelineBuilder().UseMathematics().Build();
 
+        var hasAnyTasks = await _context.MathTasks.Where(task => task.TopicId == topic.TopicId).AnyAsync();
+       
+        
+        string htmlContent = Markdown.ToHtml(topic.Content, pipeline);
 
         var topicView = new ShowTopicContentViewModel()
         {
             TopicId = topic.TopicId,
             ModuleId = moduleId,
             Name = topic.Name,
-            Content = topic.Content,
-            Tasks = tasksView
+            Content = htmlContent,
+            HasTasks = hasAnyTasks
         };
 
         
@@ -133,35 +122,83 @@ public class LearningMaterialsController : Controller
         if(task == null)
             return NotFound();
         
-        List<AnswerViewModel> answers = new List<AnswerViewModel>();
+        List<AnswerDisplayViewModel> answers = new List<AnswerDisplayViewModel>();
         if(task.AllAnswers != null  && task.AllAnswers.Count != 0)
         {
             foreach(var answer in task.AllAnswers)
             {
                 if (!string.IsNullOrWhiteSpace(answer.Content))
                 {
-                    AnswerViewModel answerView = new AnswerViewModel()
+                    AnswerDisplayViewModel answerView = new AnswerDisplayViewModel()
                     {
-                        Content = answer.Content,
-                        IsCorrect = answer.IsCorrect
+                        AnswerId = answer.AnswerId,
+                        Content = answer.Content
                     };
                     answers.Add(answerView);
                 }
             }
         }
-        
-        var taskView = new ShowTaskContentViewModel()
+        var pipeline = new MarkdownPipelineBuilder().UseMathematics().Build();
+        string htmlContent = Markdown.ToHtml(task.Contents, pipeline);
+
+        var taskDisplayView = new SolveTaskDisplayViewModel()
         {
             TaskId = task.TaskId,
-            Contents = task.Contents,
-            PointsCount = task.PointsCount,
-            DifficultyLevel = (int)task.Level,
-            ExpReward = task.ExpReward,
+            Contents = htmlContent,
             Answers = answers
         };
-
         
-        return View(taskView);
+        return View(taskDisplayView);
     }
 
+    public async Task<IActionResult> ShowTask(long moduleId, long topicId, bool? wasPreviousAnswerCorrect = null, int currentIndex = 0)
+    {
+        // task from database sorted by id
+        var allTopicTasks = _context.MathTasks.Include(task => task.AllAnswers).Where(task => task.TopicId == topicId).OrderBy(task => task.TaskId);
+        long tasksCount;
+        if(allTopicTasks == null || (tasksCount = await allTopicTasks.CountAsync()) == 0)
+        {
+            return NotFound();
+        }
+
+        
+        var task = await allTopicTasks.Skip(currentIndex).FirstOrDefaultAsync();
+        if(task == null || task.AllAnswers == null || task.AllAnswers.Count == 0)
+        {
+            return NotFound();
+        }
+
+        List<AnswerDisplayViewModel> answersViewModels = new List<AnswerDisplayViewModel>();
+        foreach(var answer in task.AllAnswers)
+        {
+            AnswerDisplayViewModel newAnswer = new AnswerDisplayViewModel()
+            {
+                AnswerId = answer.AnswerId,
+                Content = answer.Content
+            };
+            answersViewModels.Add(newAnswer);
+        }
+
+        var pipeline = new MarkdownPipelineBuilder().UseMathematics().Build();
+        var htmlContent = Markdown.ToHtml(task.Contents, pipeline);
+
+        var currentTaskDisplay = new ShowTaskContentViewModel()
+        {
+            TaskId = task.TaskId,
+            ModuleId = moduleId,
+            TopicId = topicId,
+            CurrentTaskIndex = currentIndex,
+            Contents = htmlContent,
+            TotalTasksCount = tasksCount,
+            Answers = answersViewModels,
+            RemainingAttempts = 3
+        };
+
+        if(wasPreviousAnswerCorrect != null)
+        {
+            currentTaskDisplay.HasCorrectAnswer = wasPreviousAnswerCorrect;
+        }
+
+        return View("ShowTaskContent", currentTaskDisplay);
+    }
 }

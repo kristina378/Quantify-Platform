@@ -10,7 +10,7 @@
     @foreach(var module in Model){
         <div class="card mb-3">
             <div class="card-body">
-                <a class="text-decoration-none" asp-controller="LearningMaterials" asp-action="ShowModuleContent" asp-route-moduleId="@module.ModuleId">
+                <a class="stretched-link text-decoration-none" asp-controller="LearningMaterials" asp-action="ShowModuleContent" asp-route-moduleId="@module.ModuleId">
                     <h5 class="card-title">@module.Name</h5>
                 </a>
                  @if(module.Description != null){
