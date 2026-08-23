@@ -24,6 +24,7 @@ public class MathTask
     public DifficultyLevel Level {get; init;}
     public int ExpReward{get; init;}
 
+    //here change init to set 
     public required string Contents {get; init;}
     public User? Author{get; private set;}
     public long? AuthorId { get; init; }
