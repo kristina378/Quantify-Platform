@@ -91,7 +91,7 @@ public class StudentTaskProgressTest
 
         List<Answer> userAnswers = new List<Answer>();
         //user goes for wrong answer
-        userAnswers.Add(task.AllAnswers.FirstOrDefault(answer => !answer.IsCorrect));
+        userAnswers.Add(task.AllAnswers!.First(answer => !answer.IsCorrect)!);
         StudentTaskProgress progress = new StudentTaskProgress(0, task, userAnswers);
 
         Assert.False(progress.Passed);
@@ -99,7 +99,7 @@ public class StudentTaskProgressTest
 
         userAnswers.Clear();
         //user goes for right answer but only 1 / 3
-        userAnswers.Add(task.AllAnswers.FirstOrDefault(answer => answer.IsCorrect));
+        userAnswers.Add(task.AllAnswers!.First(answer => answer.IsCorrect));
         progress.AddAnotherApproach(userAnswers);
 
         Assert.False(progress.Passed);
@@ -107,7 +107,7 @@ public class StudentTaskProgressTest
 
         userAnswers.Clear();
         //user goes for right answer but only 1 / 3
-        var listOfRightAnswers = task.AllAnswers.Where(answer => answer.IsCorrect);
+        var listOfRightAnswers = task.AllAnswers!.Where(answer => answer.IsCorrect);
         userAnswers.AddRange(listOfRightAnswers);
         progress.AddAnotherApproach(userAnswers);
 
