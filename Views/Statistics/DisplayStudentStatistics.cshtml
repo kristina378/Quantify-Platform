@@ -1,0 +1,33 @@
+@using Quantify.ViewModels
+@model List<TopicProfileStatistics>
+
+@{
+    ViewData["Title"] = "Student account statistics";
+}
+
+<div class="text-center mt-3">
+    <h2>Profile stats for 10 last topics attempts:</h2>
+    <div class="mt-4">
+            <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Topic Name</th>
+                    <th scope="col">Topic score</th>
+                    <th scope="col">Percentage</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{int i = 0;}
+                @foreach(var topicStat in Model){
+                    <tr>
+                        <th scope="row">@(++i)</th>
+                        <td><a class="link-opacity-50" asp-controller="LearningMaterials" asp-action="ShowTopicContent" asp-route-moduleId="@topicStat.ModuleId" asp-route-topicId="@topicStat.TopicId">@topicStat.TopicName</a></td>
+                        <td>@topicStat.TotalRightSolvedTasksCount/@topicStat.TotalTasksCount</td>
+                        <td>@topicStat.Percentage%</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

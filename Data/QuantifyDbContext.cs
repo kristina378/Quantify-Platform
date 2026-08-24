@@ -13,6 +13,9 @@ public class QuantifyDbContext: DbContext
     public DbSet<Tutor> Tutors {get; set;}
 
     public DbSet<MathTask> MathTasks { get; set; }
+    public DbSet<StudentTaskProgress> StudentTaskProgress { get; set;}
+
+    public DbSet<Topic> Topic { get; set;}
     public DbSet<Module> Modules { get; set; }
 
     public QuantifyDbContext(DbContextOptions<QuantifyDbContext> options) : base(options){}

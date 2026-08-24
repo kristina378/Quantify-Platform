@@ -64,6 +64,12 @@
                                 @* <li class="nav-item d-flex align-items-center">
                                     <span class="navbar-text me-3">Cześć @User.Identity?.Name!</span>
                                 </li> *@
+                                @if (User.IsInRole("Student"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-area="" asp-controller="Statistics" asp-action="DisplayStudentStatistics">My Stats</a>
+                                    </li>
+                                }
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Profile" asp-action="@action">Mój profil</a>
                                 </li>
