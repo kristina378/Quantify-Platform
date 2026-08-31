@@ -7,8 +7,6 @@ namespace Quantify.Tests;
 
 public class StudentTaskProgressTest
 {  
-   
-
     [Fact]
     public void UserInteractionTest()
     {
@@ -80,5 +78,40 @@ public class StudentTaskProgressTest
         Assert.True(progress.Passed);
         Assert.Equal(3, progress.Attempts.Count);
         Assert.Equal(lastApproach, progress.BestApproach());
+    }
+
+    [Fact]
+    public void TasksCheckingTest()
+    {
+        var module = TestData.CreateSampleModule();
+        var topic = TestData.CreateSampleTopic(module);
+
+
+        var task = TestData.CreateSampleMoreComplexTask(topic);
+
+        List<Answer> userAnswers = new List<Answer>();
+        //user goes for wrong answer
+        userAnswers.Add(task.AllAnswers!.First(answer => !answer.IsCorrect)!);
+        StudentTaskProgress progress = new StudentTaskProgress(0, task, userAnswers);
+
+        Assert.False(progress.Passed);
+        Assert.Single(progress.Attempts);
+
+        userAnswers.Clear();
+        //user goes for right answer but only 1 / 3
+        userAnswers.Add(task.AllAnswers!.First(answer => answer.IsCorrect));
+        progress.AddAnotherApproach(userAnswers);
+
+        Assert.False(progress.Passed);
+        Assert.Equal(2, progress.Attempts.Count);
+
+        userAnswers.Clear();
+        //user goes for right answer but only 1 / 3
+        var listOfRightAnswers = task.AllAnswers!.Where(answer => answer.IsCorrect);
+        userAnswers.AddRange(listOfRightAnswers);
+        progress.AddAnotherApproach(userAnswers);
+
+        Assert.True(progress.Passed);
+        Assert.Equal(3, progress.Attempts.Count);
     }
 }

@@ -58,4 +58,49 @@ public class TestData
 
         return sampleTask;
     }
+
+    public static MathTask CreateSampleMoreComplexTask(Topic topic)
+    {
+        Answer answer1 = new Answer()
+        {
+            Content = "Not right answer",
+            AnswerId = AnswerCounter++,
+            IsCorrect = false
+        };
+
+        Answer answer2 = new Answer()
+        {
+            Content = "Right answer!",
+            AnswerId = AnswerCounter++,
+            IsCorrect = true
+        };
+
+        Answer answer3 = new Answer()
+        {
+            Content = "Second right answer!",
+            AnswerId = AnswerCounter++,
+            IsCorrect = true
+        };
+
+        Answer answer4 = new Answer()
+        {
+            Content = "Third right answer!",
+            AnswerId = AnswerCounter++,
+            IsCorrect = true
+        };
+
+        List<Answer> answers = new List<Answer>();
+        answers.Add(answer1);
+        answers.Add(answer2);
+        answers.Add(answer3);
+        answers.Add(answer4);
+
+
+        MathTask sampleTask = new MathTask(0, 0, "task content for more complex task here", answers, topic)
+        {
+            TaskId = TaskCounter++,
+        };
+
+        return sampleTask;
+    }
 }
