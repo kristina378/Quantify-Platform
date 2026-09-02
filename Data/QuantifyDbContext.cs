@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Quantify.Core.Data;
 
+/// <summary>
+/// Main database context managing users, tasks, and learning materials.
+/// </summary>
 public class QuantifyDbContext: DbContext
 {
     public DbSet<User> Users { get; set; }
@@ -48,19 +51,10 @@ public class QuantifyDbContext: DbContext
          modelBuilder.Entity<MathTask>()
              .HasKey(x => x.TaskId);
 
-        // modelBuilder.Entity<MathTask>()
-        //     .HasIndex(x => x.TopicId);
-        
-
-        // modelBuilder.Entity<Topic>()
-        //     .HasIndex(x => x.ModuleId);
         
         modelBuilder.Entity<Topic>()
             .HasIndex(l => l.Name);
         
-
-        // modelBuilder.Entity<StudentTaskProgress>()
-        //     .HasIndex(x => x.UserId);
         
     }
 }

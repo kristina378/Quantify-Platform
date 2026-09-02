@@ -19,6 +19,7 @@ public class Approach
     {
         TimeStarted = DateTime.UtcNow;
     }
+    
     public Approach(MathTask task, List<Answer> studentAnswers, StudentTaskProgress progress)
     {
         TimeStarted = DateTime.UtcNow;

@@ -11,6 +11,7 @@ public class Module
 
     public List<Topic> Topics {get; private set;} = new List<Topic>();
 
+
     protected Module(){}
 
     [SetsRequiredMembers]
@@ -31,6 +32,7 @@ public class Module
         Topics.Add(newTopic);
         return newTopic;
     }
+    
     public void AddNewTopic(Topic newTopic)
     {
         Topics.Add(newTopic);

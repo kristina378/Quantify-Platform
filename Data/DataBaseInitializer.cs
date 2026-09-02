@@ -8,12 +8,15 @@ using System.Data;
 namespace Quantify.Core.Data;
 
 public class ModulesAbsenceException: Exception{}
+
+/// <summary>
+/// Class responsible for seeding initial learning materials into the database from JSON files.
+/// </summary>
 public class DataBaseInitializer
 {
     public async Task InsertLearningMaterials(QuantifyDbContext context)
     {
-        // in database there is no modules
-        if (! await context.Modules.AnyAsync())
+        if (!await context.Modules.AnyAsync())
         {
             string pathToData = Path.Combine(Directory.GetCurrentDirectory(),"Data","SeedData","seed-data.json");
             string jsonString = await File.ReadAllTextAsync(pathToData);
@@ -23,6 +26,7 @@ public class DataBaseInitializer
 
             if(modulesDTO == null)
             {
+                //Is thrown when in repository is no modules by some reason
                 throw new ModulesAbsenceException();
             }
 

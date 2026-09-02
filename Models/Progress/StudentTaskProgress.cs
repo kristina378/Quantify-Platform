@@ -32,6 +32,7 @@ public class StudentTaskProgress
         Passed = newAttempt.Passed;
     }
 
+    
     public Approach AddAnotherApproach(List<Answer> studentAnswers)
     {
         if((++ApproachNumber) < LimitCount)
