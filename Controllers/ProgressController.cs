@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Quantify.Controllers;
 
+/// <summary>
+/// Controller responsible for user progress: checking specific task, and summaries test for current topic
+/// </summary>
 public class ProgressController: Controller
 {
     protected QuantifyDbContext _context;
@@ -19,11 +22,13 @@ public class ProgressController: Controller
         _context = context;
     }
 
+    /// <summary>
+    /// Method responsible for checking whether user answered right or not (or not answered at all) and redirect to next task in current topic
+    /// </summary>
     [HttpPost]
     [Authorize]
     public async Task<IActionResult> CheckAnswer(SolveTaskViewModel userTaskAnswer)
     {
-        //extracting data about task from db
         var task = await _context.MathTasks.Include(task => task.AllAnswers).FirstOrDefaultAsync(task => task.TaskId == userTaskAnswer.TaskId);
         if(task == null)
             return NotFound();
@@ -33,7 +38,6 @@ public class ProgressController: Controller
         //that why we don't check if answers != null
 
         
-        // we convert answers db models to answer view models
         List<AnswerDisplayViewModel> answersViews = new List<AnswerDisplayViewModel>();
         foreach(var answer in taskAnswers!)
         {
@@ -70,10 +74,7 @@ public class ProgressController: Controller
         var userId = long.Parse(claimValue!);
         var student = await _context.Students.Include(student => student.Approaches).ThenInclude(approach => approach.Attempts).FirstOrDefaultAsync(student => student.Id == userId);
 
-        if(student == null)
-        {
-            //possibility that we couldn't find this user??
-        }
+        if(student == null) return Unauthorized();
 
         List<Answer> userAnswersDB = new List<Answer>();
 
@@ -92,14 +93,15 @@ public class ProgressController: Controller
 
         await _context.SaveChangesAsync();
 
+
         displayTask.HasCorrectAnswer = lastApproach.Passed;
         displayTask.RemainingAttempts = StudentTaskProgress.LimitCount - studentProgress.ApproachNumber;
 
         if (!lastApproach.Passed)
         {
-            //here we need to inform user that task wasn't solve right
             TempData["ErrorMessage"] = "Wrong answer, try again!";
         }
+
         //here the case when task solved right : all correct answers were given
         else
         {
@@ -128,6 +130,7 @@ public class ProgressController: Controller
             return NotFound();
         }
 
+
         var allTopicTasksId = (await _context.MathTasks.Where(task => task.TopicId == topicId).OrderBy(task => task.TaskId).ToListAsync()).Select(t => t.TaskId).ToList();
         if(allTopicTasksId == null)
         {
@@ -153,6 +156,8 @@ public class ProgressController: Controller
             if(approach.Passed)
                 summaryTest.TotalRightSolvedTaskCount += 1;
         }
+
+
         return View(summaryTest);
     }
 }

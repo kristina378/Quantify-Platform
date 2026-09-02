@@ -11,6 +11,9 @@ using Markdig;
 
 namespace Quantify.Controllers;
 
+/// <summary>
+/// Controller responsible for showing content learning materials such as module, topic and task
+/// </summary>
 public class LearningMaterialsController : Controller
 {
     private readonly QuantifyDbContext _context;
@@ -53,10 +56,11 @@ public class LearningMaterialsController : Controller
         if(module == null)
             return NotFound();
 
+
         var topics = module.Topics;
         List<ShowTopicContentViewModel>? topicsView = null;
         if(topics != null)
-        {   
+        {
             topicsView = new List<ShowTopicContentViewModel>();
             foreach(var topic in topics)
             {
@@ -69,6 +73,7 @@ public class LearningMaterialsController : Controller
                 topicsView.Add(newTopicView);
             }
         }
+
         var moduleView = new ShowModuleContentViewModel()
         {
             ModuleId = module.ModuleId,
@@ -85,6 +90,9 @@ public class LearningMaterialsController : Controller
     {
         var module = await _context.Modules.Include(module => module.Topics).FirstOrDefaultAsync(module => module.ModuleId == moduleId);
         var topics = module?.Topics;
+
+        // here we don't check if we did't found module because of frontend architecture:
+        // total modules list -> specific module -> topics in specific module -> specific topic -> all tasks in specific module
         if(topics == null || topics.Count == 0)
         {
             return NotFound();
@@ -96,11 +104,9 @@ public class LearningMaterialsController : Controller
             return NotFound();
         
 
-        var pipeline = new MarkdownPipelineBuilder().UseMathematics().Build();
-
         var hasAnyTasks = await _context.MathTasks.Where(task => task.TopicId == topic.TopicId).AnyAsync();
        
-        
+        var pipeline = new MarkdownPipelineBuilder().UseMathematics().Build();
         string htmlContent = Markdown.ToHtml(topic.Content, pipeline);
 
         var topicView = new ShowTopicContentViewModel()
@@ -151,11 +157,19 @@ public class LearningMaterialsController : Controller
         return View(taskDisplayView);
     }
 
+    /// <summary>
+    /// method responsible for current task content
+    /// </summary>
+    /// <param name="moduleId"></param>
+    /// <param name="topicId"></param>
+    /// <param name="wasPreviousAnswerCorrect">parameter that tells us whether: user already completed task earlier and if the answer was right</param>
+    /// <param name="currentIndex">task count in total task list in current topic</param>
+    /// <returns></returns>
     public async Task<IActionResult> ShowTask(long moduleId, long topicId, bool? wasPreviousAnswerCorrect = null, int currentIndex = 0)
     {
-        // task from database sorted by id
         var allTopicTasks = _context.MathTasks.Include(task => task.AllAnswers).Where(task => task.TopicId == topicId).OrderBy(task => task.TaskId);
         long tasksCount;
+
         if(allTopicTasks == null || (tasksCount = await allTopicTasks.CountAsync()) == 0)
         {
             return NotFound();
@@ -163,6 +177,7 @@ public class LearningMaterialsController : Controller
 
         
         var task = await allTopicTasks.Skip(currentIndex).FirstOrDefaultAsync();
+        
         if(task == null || task.AllAnswers == null || task.AllAnswers.Count == 0)
         {
             return NotFound();

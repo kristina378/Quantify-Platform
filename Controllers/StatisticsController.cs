@@ -8,6 +8,9 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Quantify.ViewModels;
 
+/// <summary>
+/// Controller responsible for user statistics
+/// </summary>
 public class StatisticsController: Controller
 {
     public QuantifyDbContext context;
@@ -17,6 +20,9 @@ public class StatisticsController: Controller
         this.context = context;
     }
 
+    /// <summary>
+    /// Method responsible for certain student statistics such as: last 10 attempts in certain topics based on logs in data base
+    /// </summary>
     [Authorize(Roles = "Student")]
     public async Task<IActionResult> DisplayStudentStatistics()
     {

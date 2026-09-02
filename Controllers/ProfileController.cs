@@ -11,6 +11,10 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Quantify.Controllers;
 
+/// <summary>
+/// Controller responsible for editing profile and "soft delete" profile from db.
+/// See more details in <see cref="DeleteProfile"/> method
+/// </summary>
 [Authorize]
 public class ProfileController : Controller
 {
@@ -24,7 +28,7 @@ public class ProfileController : Controller
     [Authorize(Roles = "Student")]
     public async Task<IActionResult> EditStudent()
     {
-        var id =  long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var id = long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var student = await _context.Users.OfType<Student>().FirstOrDefaultAsync(user=> user.Id == id);
         if(student == null)    return NotFound();
         
@@ -49,7 +53,8 @@ public class ProfileController : Controller
             return View(edition);
         }
 
-        var id =  long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var id = long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var student = await _context.Users.OfType<Student>().FirstOrDefaultAsync(user => user.Id == id);
         if(student == null)    return NotFound();
 
@@ -59,13 +64,14 @@ public class ProfileController : Controller
 
         await _context.SaveChangesAsync();
 
+
         return RedirectToAction("EditStudent","Profile");
     }
 
     [Authorize(Roles = "Tutor")]
     public async Task<IActionResult> EditTutor()
     {
-        var id =  long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var id = long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var tutor = await _context.Users.OfType<Tutor>().FirstOrDefaultAsync(user => user.Id == id);
         if(tutor == null)    return NotFound();
         
@@ -81,6 +87,7 @@ public class ProfileController : Controller
             AboutTutor = tutor.AboutTutor
         };
 
+
         return View(editTutorView);
     }
 
@@ -88,12 +95,12 @@ public class ProfileController : Controller
     [Authorize(Roles = "Tutor")]
     public async Task<IActionResult> EditTutor(EditTutorViewModel edition)
     {
-        if (!ModelState.IsValid)
+        if(!ModelState.IsValid)
         {
             return View(edition);
         }
 
-        var id =  long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var id = long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var tutor = await _context.Users.OfType<Tutor>().FirstOrDefaultAsync(user => user.Id == id);
         if(tutor == null)    return NotFound();
 
@@ -107,13 +114,14 @@ public class ProfileController : Controller
 
         await _context.SaveChangesAsync();
 
+
         return RedirectToAction("EditTutor","Profile");
     }
 
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> EditAdmin()
     {
-        var id =  long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var id = long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var admin = await _context.Users.OfType<Admin>().FirstOrDefaultAsync(user=> user.Id == id);
         if(admin == null)    return NotFound();
         
@@ -137,6 +145,8 @@ public class ProfileController : Controller
         {
             return View(edition);
         }
+
+
         long id = long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var admin = await _context.Users.OfType<Admin>().FirstOrDefaultAsync(user => user.Id == id);
         if(admin == null)    return NotFound();
@@ -151,6 +161,9 @@ public class ProfileController : Controller
         return RedirectToAction("EditAdmin","Profile");
     }
 
+    /// <summary>
+    /// Method that doesn't delete profile as row(or object) strictly from data base, but changes user data to prepared one
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteProfile()

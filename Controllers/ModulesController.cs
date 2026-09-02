@@ -6,6 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
+/// <summary>
+/// Controller responsible for adding module, topic and tasks (for users with <c>Admin</c> "mode") 
+/// in web application in your local Data Base
+/// </summary>
 public class ModulesController: Controller
 {
     private readonly QuantifyDbContext _context;
@@ -53,10 +57,12 @@ public class ModulesController: Controller
         {
             return View(module);
         }
+
         Module newModule = new Module(module.Name, module.Description);
         _context.Modules.Add(newModule);
 
         await _context.SaveChangesAsync();
+
 
         return RedirectToAction("ShowModuleContent","LearningMaterials", new { moduleId = newModule.ModuleId });
     }
@@ -80,6 +86,7 @@ public class ModulesController: Controller
 
         await _context.SaveChangesAsync();
         
+
         return RedirectToAction("ShowTopicContent","LearningMaterials", new { moduleId = module.ModuleId, topicId = newTopic.TopicId});
     }
 
@@ -125,6 +132,7 @@ public class ModulesController: Controller
         topic.AddNewTask(newTask);
 
         await _context.SaveChangesAsync();
+
         
         return RedirectToAction("ShowTaskContent", "LearningMaterials", new {taskId = newTask.TaskId});
     }

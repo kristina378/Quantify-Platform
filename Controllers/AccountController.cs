@@ -12,6 +12,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Quantify.Controllers;
 
+/// <summary>
+/// Controller responsible for account registration, login and logout
+/// </summary>
 public class AccountController : Controller
 {
     private readonly QuantifyDbContext _context;
@@ -38,25 +41,32 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> RegisterStudent(RegisterStudentViewModel registration)
     {
+        // Early return to display validation errors if user submitted malformed data 
+        // (e.g. empty fields, invalid email format)
         if (!ModelState.IsValid)
         {
             return View(registration);
         }
-        // if account with this email already exists
+
+
         if(await _context.Users.FirstOrDefaultAsync(user=> user.Email == registration.Email) != null)
         {
-            ModelState.AddModelError("Email", "Already exists an account with this email address.");
+            ModelState.AddModelError("Email", "Konto z podanym adresem e-mail już istnieje");
             return View(registration);
         }
+        
         if(await _context.Users.FirstOrDefaultAsync(user=> user.NickName == registration.NickName) != null)
         {
-            ModelState.AddModelError("NickName", "Already exists an account with this nickname.");
+            ModelState.AddModelError("NickName", "Podany nickname jest już zajęty");
             return View(registration);
         }
+        
 
+        // hash password for more user security
         var hasher = new PasswordHasher<User>();
         string hashedPassword = hasher.HashPassword(null!, registration.Password);
         
+
         User newUser = new Student(registration.Name, registration.Surname, registration.Email,
                 registration.PhoneNumber, registration.NickName, hashedPassword);
         
@@ -74,6 +84,8 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> RegisterTutor(RegisterTutorViewModel registration)
     {
+        // Early return to display validation errors if user submitted malformed data 
+        // (e.g. empty fields, invalid email format)
         if (!ModelState.IsValid)
         {
             return View(registration);
@@ -81,15 +93,18 @@ public class AccountController : Controller
 
         if(await _context.Users.FirstOrDefaultAsync(user=> user.Email == registration.Email) != null)
         {
-            ModelState.AddModelError("Email", "Already exists an account with this email address.");
+            ModelState.AddModelError("Email", "Konto z podanym adresem e-mail już istnieje");
             return View(registration);
         }
+        
         if(await _context.Users.FirstOrDefaultAsync(user=> user.NickName == registration.NickName) != null)
         {
-            ModelState.AddModelError("NickName", "Already exists an account with this nickname.");
+            ModelState.AddModelError("NickName", "Podany nickname jest już zajęty");
             return View(registration);
         }
 
+
+        // hash password for more user security
         var hasher = new PasswordHasher<User>();
         string hashedPassword = hasher.HashPassword(null!, registration.Password);
         
@@ -97,6 +112,7 @@ public class AccountController : Controller
                 registration.PhoneNumber, registration.NickName, hashedPassword, registration.Experience,
                             registration.EmploymentPlace, registration.AboutTutor);
         
+
         _context.Users.Add(newUser);
         await _context.SaveChangesAsync();
         
@@ -111,26 +127,34 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> Login(LoginViewModel loginData)
     {
+        // Early return to display validation errors if user submitted malformed data 
+        // (e.g. empty fields, invalid email format)
         if (!ModelState.IsValid)
         {
             return View(loginData);
         }
 
         var row = await _context.Users.FirstOrDefaultAsync(user => user.Email == loginData.Email);
+    
         if(row == null)
         {
             ModelState.AddModelError(string.Empty, "Nieprawidłowy e-mail lub hasło.");
             return View(loginData);
         }
 
+
         var hasher = new PasswordHasher<User>();
         var checkResult = hasher.VerifyHashedPassword(row,row.PasswordHash,loginData.Password);
+        
         if (checkResult == PasswordVerificationResult.Success)
         {
+            // here we use identification based on cookies:
             var claims = new List<Claim>();
 
+            //using id in db as identifier that guaranties unique key for identification
             claims.Add(new Claim(ClaimTypes.NameIdentifier, row.Id.ToString()));
             
+            //adding user role for frontend
             if(row is Tutor)
                 claims.Add(new Claim(ClaimTypes.Role,"Tutor"));
             else if(row is Student)
@@ -138,6 +162,7 @@ public class AccountController : Controller
             else
                 claims.Add(new Claim(ClaimTypes.Role,"Admin"));
             
+
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
@@ -145,6 +170,7 @@ public class AccountController : Controller
             return RedirectToAction("Index", "Home");
         }
 
+        //for more security the message for wrong password and email is the same
         ModelState.AddModelError(string.Empty, "Nieprawidłowy e-mail lub hasło.");
         return View(loginData);
     }
