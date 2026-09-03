@@ -17,7 +17,9 @@ public class AdminConfiguration :IEntityTypeConfiguration<Admin>
             Email = "kristinadubiaha07@gmail.com", 
             PasswordHash = hashedPassword,
             Permission = Permissions.All ,
-            IsDeleted = false
+            IsDeleted = false,
+            EmailIsVerified = true,
+            VerificationToken = string.Empty
         });
     }
 }
