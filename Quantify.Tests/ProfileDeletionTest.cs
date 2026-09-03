@@ -22,7 +22,9 @@ public class ProfileDeletionTest
             var hasher = new PasswordHasher<User>();
             string hashedPassword = hasher.HashPassword(null!, "12345678");
 
-            Student student = new Student("name", "surname", "email@gmail.com", null, "nickname", hashedPassword);
+
+            Student student = new Student("name", "surname", "email@gmail.com", null, "nickname", hashedPassword, "");
+            student.ConfirmEmail();
 
             context.Users.Add(student);
             context.SaveChanges();

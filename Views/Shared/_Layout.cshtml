@@ -44,8 +44,17 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
+                <a class="navbar-brand" href="/">Quantify @userRole</a>
+                <div class="collapse navbar-collapse d-flex justify-content-start">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="LearningMaterials" asp-action="ShowModulesList" style="color: #77b6ff">
+                                Materiały
+                            </a>
+                        </li>
+                    </ul>
+                </div>
                 @if(User.Identity?.IsAuthenticated == false){
-                    <a class="navbar-brand" href="/">Quantify @userRole</a>
                     <div class="collapse navbar-collapse d-flex justify-content-end">
                         <ul class="navbar-nav">
                             <li class="nav-item">
@@ -58,12 +67,12 @@
                     </div>
                 }
                else{
-                        <a class="navbar-brand" href="/">Quantify @userRole</a>
                         <div class="collapse navbar-collapse d-flex justify-content-end">
                             <ul class="navbar-nav">
                                 @* <li class="nav-item d-flex align-items-center">
                                     <span class="navbar-text me-3">Cześć @User.Identity?.Name!</span>
                                 </li> *@
+                                
                                 @if (User.IsInRole("Student"))
                                 {
                                     <li class="nav-item">

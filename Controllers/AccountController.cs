@@ -67,24 +67,29 @@ public class AccountController : Controller
         }
         
 
-        // hash password for more user security
+        // hash password and verification token for more user security
         var hasher = new PasswordHasher<User>();
         string hashedPassword = hasher.HashPassword(null!, registration.Password);
         
-
+        string generatedToken = Guid.NewGuid().ToString();
+        
         User newUser = new Student(registration.Name, registration.Surname, registration.Email,
-                registration.PhoneNumber, registration.NickName, hashedPassword);
+                registration.PhoneNumber, registration.NickName, hashedPassword, generatedToken);
         
         _context.Users.Add(newUser);
         await _context.SaveChangesAsync();
 
-        
+        string linkToConfirmation = Url.Action("ConfirmEmail", "Account", new {userId = newUser.Id, token = generatedToken}, Request.Scheme);
         string subject = "Witamy w Quantify Student!";
         string htmlMessage = $@"
             <div style='font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>
                 <h2 style='color: #2c3e50;'>Witaj {registration.NickName}!</h2>
                 <p>Twoje konto w platformie edukacyjnej <strong>Quantify</strong> zostało pomyślnie utworzone.</p>
-                <p>Cieszymy się, że do nas dołączasz. Zaloguj się, aby rozpocząć rozwiązywanie zadań.</p>
+                <p>Cieszymy się, że do nas dołączasz! Żeby w pełni korzystać z platformy:</p>
+                <br/>
+                    <h3 class='text-center' style='color: #09345f;'>
+                        <a href='{linkToConfirmation}'>Potwierdż swój email</a>
+                    </h3>
                 <br/>
                 <p>Pozdrawiamy,<br/>Zespół Quantify</p>
             </div>";
@@ -129,25 +134,31 @@ public class AccountController : Controller
         }
 
 
-        // hash password for more user security
+        // hash password and verification token for more user security
         var hasher = new PasswordHasher<User>();
         string hashedPassword = hasher.HashPassword(null!, registration.Password);
+
+        string generatedToken = Guid.NewGuid().ToString();
         
         User newUser = new Tutor(registration.Name, registration.Surname, registration.Email,
-                registration.PhoneNumber, registration.NickName, hashedPassword, registration.Experience,
+                registration.PhoneNumber, registration.NickName, hashedPassword, generatedToken, registration.Experience,
                             registration.EmploymentPlace, registration.AboutTutor);
         
 
         _context.Users.Add(newUser);
         await _context.SaveChangesAsync();
 
-        
+        string linkToConfirmation = Url.Action("ConfirmEmail", "Account", new {userId = newUser.Id, token = generatedToken}, Request.Scheme);
         string subject = "Witamy w Quantify Tutor!";
         string htmlMessage = $@"
             <div style='font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>
                 <h2 style='color: #2c3e50;'>Witaj {registration.NickName}!</h2>
                 <p>Twoje konto w platformie edukacyjnej <strong>Quantify</strong> zostało pomyślnie utworzone.</p>
-                <p>Cieszymy się, że do nas dołączasz. Zaloguj się, aby rozpocząć rozwiązywanie zadań.</p>
+                <p>Cieszymy się, że do nas dołączasz! Żeby w pełni korzystać z platformy:</p>
+                <br/>
+                    <h3 class='text-center' style='color: #09345f;'>
+                        <a href='{linkToConfirmation}'>Potwierdż swój email</a>
+                    </h3>
                 <br/>
                 <p>Pozdrawiamy,<br/>Zespół Quantify</p>
             </div>";
@@ -161,6 +172,52 @@ public class AccountController : Controller
             Console.WriteLine($">>> Błąd wysyłki SMTP: {ex.Message}");
         }
         
+        return RedirectToAction("Index", "Home");
+    }
+
+/// <summary>
+/// Method responsible for checking whether user went throw the verification process successfully (and log into account if the 
+/// verification was successful) or not
+/// </summary>
+    public async Task<IActionResult> ConfirmEmail(long userId, string token)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(user => user.Id == userId);
+
+        if(user == null)
+            return NotFound();
+        
+        if(!(user.VerificationToken == token))
+        {
+            // in some way user entered wrong token
+            TempData["FailureConfirmation"] = "Coś poszło nie tak: nie udało się potwierdzić konta";
+            return RedirectToAction("Index", "Home");
+        }
+
+        user.ConfirmEmail();
+        await _context.SaveChangesAsync();
+
+
+        // here we use identification based on cookies:
+        var claims = new List<Claim>();
+
+        //using id in db as identifier that guaranties unique key for identification
+        claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
+            
+        //adding user role for frontend
+        if(user is Tutor)
+            claims.Add(new Claim(ClaimTypes.Role,"Tutor"));
+        else if(user is Student)
+            claims.Add(new Claim(ClaimTypes.Role,"Student"));
+        else
+            claims.Add(new Claim(ClaimTypes.Role,"Admin"));
+        
+
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+        // !!! here also needs to be info for user that he has been logged into
+        TempData["SuccessConfirmation"] = "Udało się potwierdzić konto. Jesteś obecnie zalogowany na swoje konto.";
         return RedirectToAction("Index", "Home");
     }
 
@@ -184,6 +241,12 @@ public class AccountController : Controller
         if(row == null)
         {
             ModelState.AddModelError(string.Empty, "Nieprawidłowy e-mail lub hasło.");
+            return View(loginData);
+        }
+
+        if(!row.EmailIsVerified)
+        {
+            ModelState.AddModelError(string.Empty, "Żeby korzystać z konta trzeba najpierw go potwierdzić");
             return View(loginData);
         }
 

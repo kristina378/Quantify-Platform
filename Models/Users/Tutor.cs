@@ -13,8 +13,8 @@ public class Tutor: User
     protected Tutor(){}
 
     [SetsRequiredMembers]
-    public Tutor(string? name, string? surname, string email, string? phoneNumber, string nickName, string passwordHash,
-                    string? experience, string? employmentPlace, string aboutTutor):base(name, surname, email, phoneNumber, nickName, passwordHash)
+    public Tutor(string? name, string? surname, string email, string? phoneNumber, string nickName, string passwordHash, string verificationToken,
+                    string? experience, string? employmentPlace, string aboutTutor):base(name, surname, email, phoneNumber, nickName, passwordHash, verificationToken)
     {
         Experience = experience;
         EmploymentPlace = employmentPlace;

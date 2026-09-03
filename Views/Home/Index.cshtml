@@ -15,6 +15,19 @@
     }
 </style>
 
+@if (TempData["SuccessConfirmation"] != null)
+{
+    <div class="alert alert-success text-center">
+        @TempData["SuccessConfirmation"]
+    </div>
+}
+@if (TempData["FailureConfirmation"] != null)
+{
+    <div class="alert alert-danger text-center">
+        @TempData["FailureConfirmation"]
+    </div>
+}
+
 <div class="container mt-5">
     <div class="text-center"><h1 class="display-4">Welcome</h1></div>
         <div class="row">
@@ -29,7 +42,7 @@
                         <li class="mb-2" style="font-size: 25px;">➔ możliwość pilnowania swojego progresu</li>
                         <li class="mb-2" style="font-size: 25px;">➔ dodatkowe monetki do zbierania</li>
                     </ul>
-                    <a class="btn btn-outline-custom w-70 text-center mt-4" style="font-size: 30px;" href="/Account/Register">Przebij swoje obawy i nie poddaj się matematyce!</a>
+                    <a class="btn btn-outline-custom w-70 text-center mt-5" style="font-size: 30px;" href="/Account/Register">Przebij swoje obawy i nie poddaj się matematyce!</a>
             </div>
             <div class="col-lg-5 text-center">
                 <img class="img-fluid mt-4" style="max-width: 200px;" src="/images/20160901_073213.jpg" alt="Moje zdjęcie"/>
@@ -43,7 +56,6 @@
                     <i>Jeżeli chcesz do mnie napisać</i>: <a href="mailto:kristinadubiaha07@gmail.com">poczta</a>
                 </p>
             </div>
-            <a asp-controller="LearningMaterials" asp-action="ShowModulesList" class="text-center mt-3" style="font-size: 20px;">Link do dostępnych materialów</a>
         </div>
     </div>
 </div>

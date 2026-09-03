@@ -16,15 +16,15 @@ public class Student: User
     }
 
     [SetsRequiredMembers]
-    public Student(string? name, string? surname, string email, string? phoneNumber, string nickName, string passwordHash)
-                        :base(name, surname, email, phoneNumber, nickName, passwordHash)
+    public Student(string? name, string? surname, string email, string? phoneNumber, string nickName, string passwordHash, string verificationToken)
+                        :base(name, surname, email, phoneNumber, nickName, passwordHash, verificationToken)
     {
         CoinsCount = 0;
     }
 
     [SetsRequiredMembers]
-    public Student(string? name, string? surname, string email, string? phoneNumber, string nickName, string passwordHash,
-                 List<Tutor> tutors):base(name, surname, email, phoneNumber, nickName, passwordHash)
+    public Student(string? name, string? surname, string email, string? phoneNumber, string nickName, string passwordHash, string verificationToken,
+                 List<Tutor> tutors):base(name, surname, email, phoneNumber, nickName, passwordHash, verificationToken)
     {
         CoinsCount = 0;
         Tutors = tutors;
