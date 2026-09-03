@@ -9,6 +9,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Quantify.Services.Email;
 
 namespace Quantify.Controllers;
 
@@ -18,11 +19,15 @@ namespace Quantify.Controllers;
 public class AccountController : Controller
 {
     private readonly QuantifyDbContext _context;
+    private readonly IEmailSender _emailSender;
 
-    public AccountController(QuantifyDbContext context)
+    public AccountController(QuantifyDbContext context, IEmailSender emailSender)
     {
         _context = context;
+        _emailSender = emailSender;
     }
+
+
     public IActionResult Index()
     {
         return View();
@@ -72,6 +77,26 @@ public class AccountController : Controller
         
         _context.Users.Add(newUser);
         await _context.SaveChangesAsync();
+
+        
+        string subject = "Witamy w Quantify Student!";
+        string htmlMessage = $@"
+            <div style='font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>
+                <h2 style='color: #2c3e50;'>Witaj {registration.NickName}!</h2>
+                <p>Twoje konto w platformie edukacyjnej <strong>Quantify</strong> zostało pomyślnie utworzone.</p>
+                <p>Cieszymy się, że do nas dołączasz. Zaloguj się, aby rozpocząć rozwiązywanie zadań.</p>
+                <br/>
+                <p>Pozdrawiamy,<br/>Zespół Quantify</p>
+            </div>";
+
+        try 
+        {
+            await _emailSender.SendEmailAsync(registration.Email, subject, htmlMessage);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($">>> Błąd wysyłki SMTP: {ex.Message}");
+        }
         
         return RedirectToAction("Index", "Home");
     }
@@ -115,6 +140,26 @@ public class AccountController : Controller
 
         _context.Users.Add(newUser);
         await _context.SaveChangesAsync();
+
+        
+        string subject = "Witamy w Quantify Tutor!";
+        string htmlMessage = $@"
+            <div style='font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>
+                <h2 style='color: #2c3e50;'>Witaj {registration.NickName}!</h2>
+                <p>Twoje konto w platformie edukacyjnej <strong>Quantify</strong> zostało pomyślnie utworzone.</p>
+                <p>Cieszymy się, że do nas dołączasz. Zaloguj się, aby rozpocząć rozwiązywanie zadań.</p>
+                <br/>
+                <p>Pozdrawiamy,<br/>Zespół Quantify</p>
+            </div>";
+
+        try 
+        {
+            await _emailSender.SendEmailAsync(registration.Email, subject, htmlMessage);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($">>> Błąd wysyłki SMTP: {ex.Message}");
+        }
         
         return RedirectToAction("Index", "Home");
     }

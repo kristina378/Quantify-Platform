@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore.Internal;
 using System.Runtime.InteropServices.Marshalling;
 using Microsoft.Extensions.DependencyInjection;
+using Quantify.Services.Email;
 
 public class Program
 {
@@ -19,6 +20,14 @@ public class Program
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
         builder.Services.AddDbContext<QuantifyDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+
+
+        // Pobranie ustawień z appsettings.json
+        builder.Services.Configure<Quantify.Services.Email.EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+        // Wstrzyknięcie serwisu (żeby AccountController mógł go użyć)
+        builder.Services.AddTransient<Quantify.Services.Email.IEmailSender, Quantify.Services.Email.EmailSender>();
+
 
         var app = builder.Build();
 
