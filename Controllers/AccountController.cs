@@ -79,7 +79,9 @@ public class AccountController : Controller
         _context.Users.Add(newUser);
         await _context.SaveChangesAsync();
 
-        string linkToConfirmation = Url.Action("ConfirmEmail", "Account", new {userId = newUser.Id, token = generatedToken}, Request.Scheme);
+        // here possibility that action couldn't generate link, but in this case impossible (Action return null when couldn't find action)
+        // in this case action is located below
+        string linkToConfirmation = Url.Action("ConfirmEmail", "Account", new {userId = newUser.Id, token = generatedToken}, Request.Scheme)!;
         string subject = "Witamy w Quantify Student!";
         string htmlMessage = $@"
             <div style='font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>
@@ -148,7 +150,9 @@ public class AccountController : Controller
         _context.Users.Add(newUser);
         await _context.SaveChangesAsync();
 
-        string linkToConfirmation = Url.Action("ConfirmEmail", "Account", new {userId = newUser.Id, token = generatedToken}, Request.Scheme);
+        // here possibility that action couldn't generate link, but in this case impossible (Action return null when couldn't find action)
+        // in this case action is located below
+        string linkToConfirmation = Url.Action("ConfirmEmail", "Account", new {userId = newUser.Id, token = generatedToken}, Request.Scheme)!;
         string subject = "Witamy w Quantify Tutor!";
         string htmlMessage = $@"
             <div style='font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>
@@ -216,7 +220,7 @@ public class AccountController : Controller
         var principal = new ClaimsPrincipal(identity);
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-        // !!! here also needs to be info for user that he has been logged into
+        
         TempData["SuccessConfirmation"] = "Udało się potwierdzić konto. Jesteś obecnie zalogowany na swoje konto.";
         return RedirectToAction("Index", "Home");
     }
